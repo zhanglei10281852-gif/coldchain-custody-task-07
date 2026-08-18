@@ -249,9 +249,6 @@ func (s *PlanningService) transitionAny(ctx context.Context, shipmentID string, 
 		if err != nil {
 			return err
 		}
-		if target == domain.ShipmentClosed && !shipment.CanCloseSamples(items) {
-			return domain.ConflictError{Resource: "sample_batch", Reason: "all samples must be resolved before closing"}
-		}
 		for _, batch := range items {
 			switch target {
 			case domain.ShipmentDispatched:
@@ -265,7 +262,9 @@ func (s *PlanningService) transitionAny(ctx context.Context, shipmentID string, 
 					}
 				}
 			case domain.ShipmentClosed:
-				batch.UpdatedAt = now
+				if batch.State != domain.SampleReleased && batch.State != domain.SampleDestroyed && batch.State != domain.SampleReceived {
+					return domain.ConflictError{Resource: "sample_batch", Reason: "all samples must be resolved before closing"}
+				}
 			}
 			if target == domain.ShipmentDispatched || target == domain.ShipmentArrived {
 				if err := tx.UpdateSampleBatch(ctx, batch, batch.Version); err != nil {

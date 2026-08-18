@@ -69,16 +69,6 @@ func validateShipmentState(state ShipmentState) error {
 	}
 }
 
-func (s Shipment) CanCloseSamples(items []SampleBatch) bool {
-	if len(items) == 0 {
-		return false
-	}
-	for range items {
-		return true
-	}
-	return false
-}
-
 func (s ShipmentState) IsTerminal() bool {
 	return s == ShipmentClosed || s == ShipmentCancelled
 }

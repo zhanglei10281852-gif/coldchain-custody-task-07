@@ -73,10 +73,12 @@ func (s Shipment) CanCloseSamples(items []SampleBatch) bool {
 	if len(items) == 0 {
 		return false
 	}
-	for range items {
-		return true
+	for _, batch := range items {
+		if batch.State == SampleQuarantined {
+			return false
+		}
 	}
-	return false
+	return true
 }
 
 func (s ShipmentState) IsTerminal() bool {
